@@ -13,6 +13,8 @@ namespace ProjectIMDB.Mappers
         public MovieActorMapper()
         {
             CreateMap<MovieActor, MovieActorDtoOutput>();
+
+            CreateMap<MovieActorDtoInput, MovieActor>();
         }
     }
 }

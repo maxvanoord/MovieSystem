@@ -19,9 +19,9 @@ namespace ProjectIMDB.Dto
         public Guid DirectorId { get; set; }
 
         // List must consist of only Actors whom are not known by the system yet
-        public ICollection<ActorDtoInput> NewActors { get; set; }
+        public ICollection<ActorDtoInput> NewActorInstances { get; set; }
 
         // List must consist of only ActorId's whom are known by the system
-        public ICollection<ActorDtoInputExisting> ExistingActors { get; set; }
+        public ICollection<ActorDtoInputExisting> ExistingActorGuids { get; set; }
     }
 }

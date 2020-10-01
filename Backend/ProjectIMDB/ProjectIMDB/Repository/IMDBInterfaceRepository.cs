@@ -13,5 +13,6 @@ namespace ProjectIMDB.Repository
         IQueryable<TEntity> GetAll();
         TEntity GetById(Guid id);
         void Insert(TEntity entity);
+        void Update(TEntity entity);
     }
 }

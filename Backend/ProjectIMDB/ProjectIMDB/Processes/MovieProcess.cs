@@ -18,41 +18,51 @@ namespace ProjectIMDB.Processes
     public class MovieProcess : ProcessBase
     {
         private readonly IMapper _mapper;
-        private readonly IMDBInterfaceRepository<Movie> _movies;
+        private readonly IMDBInterfaceRepository<Movie> _movieRepo;
 
         public MovieProcess(InterfaceUnitOfWork unitOfWork, IMapper mapper) : base(unitOfWork)
         {
             _mapper = mapper;
-            _movies = unitOfWork.GetRepository<Movie>();
+            _movieRepo = unitOfWork.GetRepository<Movie>();
         }
 
         // Retreive all movies in database
         public IQueryable<Movie> GetAllMovies()
         {
-            var movies = _movies.GetAll()
+            var allMovies = _movieRepo.GetAll()
                 .Include(movie => movie.Director)
                 .Include(movie => movie.MovieActors)
-                .ThenInclude(movieActor => movieActor.Actor);
+                    .ThenInclude(movieActor => movieActor.Actor);
 
-            return movies;
+            return allMovies;
         }
 
         // Retreive specific movies with provided filters 
-        public IEnumerable<MovieDtoOutput> GetMovies(SearchMovieFilter filter)
+        public List<MovieDtoOutput> GetMoviesFilter(SearchMovieFilter filter)
         {
-            if (string.IsNullOrWhiteSpace(filter.SearchQuery))
-                return _mapper.Map<IEnumerable<MovieDtoOutput>>(GetAllMovies().ToList());
+            var query = GetAllMovies();
 
-            IQueryable<Movie> movies = GetAllMovies();
-            movies = movies.Where(movie => movie.Title.Contains(filter.SearchQuery));
-            
-            return _mapper.Map<IEnumerable<MovieDtoOutput>>(movies.ToList());
+            switch (filter.SortBy)
+            {
+                case "title":
+                    if (filter.Order == "asc")
+                        query = query.OrderBy(k => k.Title);
+                    else { query = query.OrderByDescending(k => k.Title); }
+                    break;
+                case "directorName":
+                    if (filter.Order == "asc")
+                        query = query.OrderBy(k => k.Director.Name);
+                    else { query = query.OrderByDescending(k => k.Director.Name); }
+                    break;
+            }
+
+            return _mapper.Map<List<MovieDtoOutput>>(query.ToList());
         }
 
         // Retreive a movie with provided MovieId
-        public MovieDtoOutput GetMovieById(Guid movieId)
+        public MovieDtoOutput GetMovieDtoById(Guid movieId)
         {
-            var movieToReturn = _movies.GetAll()
+            var movieToReturn = _movieRepo.GetAll()
                 .Include(movie => movie.Director)
                 .Include(movie => movie.MovieActors)
                 .ThenInclude(movieActor => movieActor.Actor)
@@ -61,30 +71,44 @@ namespace ProjectIMDB.Processes
             return _mapper.Map<MovieDtoOutput>(movieToReturn);
         }
 
+        public Movie GetMovieById(Guid movieId)
+        {
+            var movieToReturn = _movieRepo.GetAll()
+                .Include(movie => movie.Director)
+                .Include(movie => movie.MovieActors)
+                .ThenInclude(movieActor => movieActor.Actor)
+                .First(movie => movie.MovieId == movieId);
+
+            return movieToReturn;
+        }
+
+
         // Adding a movie to a database
         public MovieDtoOutput InsertMovie(MovieDtoInput inputMovie)
         {
             // List of new Actor objects (still dto to remain some fields) refering to the movie
-            ICollection<ActorDtoInput> actorsDtoInput = inputMovie.NewActors;
-            ICollection<ActorDtoInputExisting> actorDtoInputExistings = inputMovie.ExistingActors;
+            ICollection<ActorDtoInput> actorsDtoInput = inputMovie.NewActorInstances;
+            ICollection<ActorDtoInputExisting> actorDtoInputExistings = inputMovie.ExistingActorGuids;
             Movie movieToInsert = _mapper.Map<Movie>(inputMovie);
 
-            Movie movie = InsertMovieMagic.Magic(movieToInsert, actorsDtoInput, actorDtoInputExistings, _mapper);
+            // Mapping the related entities to the Movie 
+            Movie movie = InsertMovieHelper.MapRelational(movieToInsert, actorsDtoInput, actorDtoInputExistings, _mapper);
 
-            _movies.Insert(movie);
+            _movieRepo.Insert(movie);
             UnitOfWork.SaveChanges();
 
-            return _mapper.Map<MovieDtoOutput>(GetMovieById(movie.MovieId));
+            return _mapper.Map<MovieDtoOutput>(GetMovieDtoById(movie.MovieId));
         }
 
         // Editing an existing movie from database
-        public void UpdateMovie(Guid movieId, MovieDtoInput UpdatedMovie)
+        public MovieDtoOutput UpdateMovie(Guid movieId, MovieDtoUpdate UpdatedMovie)
         {
-            Movie movieToUpdate = _mapper.Map<Movie>(GetMovieById(movieId));
+            // Changing the movie to updated one
+            _movieRepo.Update(_mapper.Map<Movie>(UpdatedMovie));
+            UnitOfWork.SaveChanges();
 
-            if (UpdatedMovie.Title != null)
-                movieToUpdate.Title = UpdatedMovie.Title;
-            
+            return GetMovieDtoById(movieId);
+
         }
     }
 }

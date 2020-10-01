@@ -9,9 +9,9 @@ using ProjectIMDB.Entities;
 
 namespace ProjectIMDB.Helpers
 {
-    public class InsertMovieMagic
+    public class InsertMovieHelper
     {
-        public static Movie Magic(Movie movieToInsert, ICollection<ActorDtoInput> actorsDtoInput, ICollection<ActorDtoInputExisting> actorDtoInputExistings, IMapper mapper)
+        public static Movie MapRelational(Movie movieToInsert, ICollection<ActorDtoInput> actorsDtoInput, ICollection<ActorDtoInputExisting> actorDtoInputExistings, IMapper mapper)
         {
             // Adding (NEW ACTOR OBJECTS) relational instances to the new movie object 
             if (actorsDtoInput != null)

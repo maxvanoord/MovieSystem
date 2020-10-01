@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using ProjectIMDB.Dto;
+using ProjectIMDB.Dto.CreatingMovie;
 using ProjectIMDB.Entities;
 using ProjectIMDB.Helpers;
 
@@ -15,7 +16,14 @@ namespace ProjectIMDB.Mappers
         {
             CreateMap<MovieDtoInput, Movie>();
 
-            CreateMap<Movie, MovieDtoUpdate>();
+            //CreateMap<MovieDtoCreate, Movie>()
+            //    .ForMember(movie => movie.MovieActors,
+            //    option => option.MapFrom(movieDtoCreate =>
+            //    {
+                    
+            //    }));
+
+            CreateMap<MovieDtoUpdate, Movie>();
 
             CreateMap<Movie, MovieDtoOutput>()
                 .ForMember(

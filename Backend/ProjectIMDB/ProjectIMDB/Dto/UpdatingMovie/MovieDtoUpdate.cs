@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using ProjectIMDB.Dto.CreatingMovie;
+using ProjectIMDB.Entities;
 
 namespace ProjectIMDB.Dto
 {
     public class MovieDtoUpdate
     {
+        public Guid MovieId { get; set; }
         public string Title { get; set; }
         public string Genre { get; set; }
         public string Description { get; set; }
@@ -22,10 +24,6 @@ namespace ProjectIMDB.Dto
         // Used for linking an existing Director to the movie
         public Guid DirectorId { get; set; }
 
-        // List must consist of only Actors whom are not known by the system yet
-        public ICollection<ActorDtoInput> NewActors { get; set; }
-
-        // List must consist of only ActorId's whom are known by the system
-        public ICollection<ActorDtoInputExisting> ExistingActors { get; set; }
+        public ICollection<MovieActorDtoInput> MovieActors { get; set; }
     }
 }

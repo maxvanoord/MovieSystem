@@ -45,5 +45,10 @@ namespace ProjectIMDB.Repository
         {
             _dbSet.Add(entity);
         }
+
+        public void Update(TEntity entity)
+        {
+            _dbSet.Update(entity);
+        }
     }
 }

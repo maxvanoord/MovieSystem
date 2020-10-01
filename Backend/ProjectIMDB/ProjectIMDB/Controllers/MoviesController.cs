@@ -30,13 +30,13 @@ namespace ProjectIMDB.Controllers
         [HttpGet]
         public IEnumerable<MovieDtoOutput> GetMovies([FromQuery] SearchMovieFilter filter)
         {
-            return _movieProcess.GetMovies(filter);
+            return _movieProcess.GetMoviesFilter(filter);
         }
 
         [HttpGet("{movieId}", Name = "GetMovieById")]
         public ActionResult<MovieDtoOutput> GetMovieById(Guid movieId)
         {
-            return _movieProcess.GetMovieById(movieId);
+            return _movieProcess.GetMovieDtoById(movieId);
         }
 
         [HttpPost("addmovie")]
@@ -47,12 +47,12 @@ namespace ProjectIMDB.Controllers
             return CreatedAtRoute("GetMovieById", new { movieId = movieCreated.MovieId }, movieCreated);
         }
 
-        [HttpPatch("update/{movieId}")]
-        public ActionResult UpdateMovie(Guid movieId, MovieDtoInput updatedMovie)
+        [HttpPost("update/{movieId}")]
+        public ActionResult<MovieDtoOutput> UpdateMovie(Guid movieId, MovieDtoUpdate updatedMovie)
         {
-            _movieProcess.UpdateMovie(movieId, updatedMovie);
+            var res = _movieProcess.UpdateMovie(movieId, updatedMovie);
 
-            return NoContent();
+            return res;
         }
     }
 }
